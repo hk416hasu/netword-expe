@@ -1,0 +1,91 @@
+**Router is 'Cisco 7200'**, u can download it in GNS3
+**Cloud is connected to the virtual interface 'virbr0'**
+**your host machine can connect to any network**
+
+> [RTFM](https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/fundamentals/configuration/15mt/fundamentals-15-mt-book.html) STFW ATFAI
+
+Router:
+```bash
+# 1. configurate the ip address of Router by DHCP
+conf t
+interface $THE_PORT_TO_CLOUD # such as f0/0
+ip address dhcp
+no shutdown
+<C-Z>
+show ip interface brief
+
+# 2. configurate the other port of Router (of the SubNet)
+conf t
+interface $THE_PORT_TO_SUBNET # such as f1/0
+ip address 192.168.1.1 255.255.255.0
+no shutdown
+<C-Z>
+show ip interface brief
+
+# 2.1 configurate the other subnet
+conf t
+interface $THE_PORT_TO_OTHER_SUBNET # such as f2/0
+ip address 192.168.2.1 255.255.255.0
+no shutdown
+exit
+# u can ping LAN now
+
+# 3. NAT for the Internet (f0/0 is the port to Cloud, for example)
+conf t
+access-list 1 permit 192.168.1.0 0.0.0.255
+access-list 1 permit 192.168.2.0 0.0.0.255
+
+interface f0/0
+ip nat outside
+exit
+
+interface f1/0
+ip nat inside
+exit
+
+interface f2/0
+ip nat inside
+exit
+
+ip nat inside source list 1 interface f0/0 overload
+# u can ping ipv4 now
+```
+
+---
+
+PC:
+```bash
+# 1. test the connection in LAN
+ip 192.168.1.2 255.255.255.0 192.168.1.1
+# | ipv4      | mask         | gateway
+show ip
+ping 192.168.1.1
+
+# 2. test the connection to ipv4(Internet)
+ping 82.156.207.47
+
+# 3. test the Domain Name resolve
+ip dns 8.8.8.8
+ping hk416hasu.fun
+```
+
+---
+what AI told me:
+
+#### virbr0 的作用
+
+在 GNS3 的环境中，virbr0 扮演了以下角色：
+
+1. 内部通信：
+
+   - 将虚拟化的路由器、交换机等设备互联。
+   - 支持不同虚拟设备之间的数据包交换。
+
+2. 连接宿主机：
+   - 如果你需要模拟的网络设备访问宿主机（例如共享文件或运行 ping 测试），virbr0 提供桥梁。
+
+
+3. 访问互联网：
+   - virbr0 通过 NAT 方式将虚拟设备连接到你的物理网络，使虚拟设备可以访问互联网（比如更新软件包、连接外部服务等）。
+
+---
