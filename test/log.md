@@ -9,7 +9,7 @@ Router:
 # 1. configurate the ip address of Router by DHCP
 conf t
 interface $THE_PORT_TO_CLOUD # such as f0/0
-ip address dhcp
+ip addr dhcp
 no shutdown
 <C-Z>
 show ip interface brief
@@ -17,15 +17,15 @@ show ip interface brief
 # 2. configurate the other port of Router (of the SubNet)
 conf t
 interface $THE_PORT_TO_SUBNET # such as f1/0
-ip address 192.168.1.1 255.255.255.0
+ip addr 192.168.1.1 255.255.255.0
 no shutdown
-<C-Z>
+end
 show ip interface brief
 
 # 2.1 configurate the other subnet
 conf t
 interface $THE_PORT_TO_OTHER_SUBNET # such as f2/0
-ip address 192.168.2.1 255.255.255.0
+ip addr 192.168.2.1 255.255.255.0
 no shutdown
 exit
 # u can ping LAN now
@@ -49,6 +49,17 @@ exit
 
 ip nat inside source list 1 interface f0/0 overload
 # u can ping ipv4 now
+
+# 4.save configuration into file/ROM
+  copy running-config startup-config
+  # or
+  write memory
+      # /path/to/GNS3/projects/$PROJ_NAME/project-files/dynamics/.../xxx_nvram
+
+  # check startup-config
+  show startup-config
+
+  # no need to load manually, it will be and auto loading
 ```
 
 ---
@@ -67,6 +78,13 @@ ping 82.156.207.47
 # 3. test the Domain Name resolve
 ip dns 8.8.8.8
 ping hk416hasu.fun
+
+# 4. save configuration
+save config-test.txt # in project called "test"
+               # path is /path/to/GNS3/projects/$PROJ_NAME/project-files/vpcs/...
+
+# 4.1 load configuration
+load $CONFIG_FILE # such as config-test.txt
 ```
 
 ---
